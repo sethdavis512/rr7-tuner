@@ -1,0 +1,18 @@
+{
+  "name": "rr7-tuner",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Seth Davis <sethdavis512@gmail.com> (https://sethdavis.tech/)",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "inquirer": "^12.9.4",
+    "yargs": "^18.0.0",
+    "zod": "^4.1.5",
+    "zx": "^8.8.1"
+  }
+}
