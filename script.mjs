@@ -19,6 +19,12 @@ const argv = yargs(hideBin(process.argv))
         description: 'Authentication method to integrate',
         choices: ['better-auth']
     })
+    .option('routes', {
+        alias: 'r',
+        type: 'boolean',
+        description: 'Include example routes (CRUD operations)',
+        default: true
+    })
     .help()
     .version('0.0.1').argv;
 
@@ -35,13 +41,16 @@ const PackageJsonSchema = z.object({
 const CliArgsSchema = z.object({
     orm: z.enum(['prisma', 'drizzle']).optional(),
     auth: z.enum(['better-auth']).optional(),
+    routes: z.boolean().optional(),
+    r: z.boolean().optional(), // alias
     _: z.array(z.unknown()).optional(),
     $0: z.string().optional()
 }).passthrough(); // Allow additional yargs properties
 
 const InquirerAnswersSchema = z.object({
     database: z.enum(['prisma', 'drizzle', 'none']),
-    auth: z.enum(['better-auth', 'none'])
+    auth: z.enum(['better-auth', 'none']),
+    includeRoutes: z.boolean()
 });
 
 // ========== Validation Utilities ==========
@@ -89,7 +98,7 @@ console.log(
 
 // ========== ORM Integration Functions ==========
 
-async function integratePrisma() {
+async function integratePrisma(includeRoutes = true) {
     console.log('Integrating Prisma ORM following React Router 7 guide...');
 
     // Step 1: Install Prisma dependencies (exact from tutorial)
@@ -192,11 +201,12 @@ seed()
     await fs.promises.writeFile('prisma/seed.ts', seedFile);
     console.log('✅ Seed file created');
 
-    // Step 6: Create example routes
-    console.log('📝 Creating example routes...');
-    await $`mkdir -p app/routes`;
+    // Step 6: Create example routes (optional)
+    if (includeRoutes) {
+        console.log('📝 Creating example routes...');
+        await $`mkdir -p app/routes`;
 
-    // Posts index route
+        // Posts index route
     const postsRoute = `import { prisma } from "~/lib/prisma";
 import type { Route } from "./+types/posts";
 import { Link } from "react-router";
@@ -317,8 +327,9 @@ export default function NewPost() {
   );
 }`;
 
-    await fs.promises.writeFile('app/routes/posts.new.tsx', newPostRoute);
-    console.log('✅ Example routes created');
+        await fs.promises.writeFile('app/routes/posts.new.tsx', newPostRoute);
+        console.log('✅ Example routes created');
+    }
 
     // Step 7: Update package.json with Prisma scripts
     console.log('📝 Updating package.json scripts...');
@@ -348,7 +359,7 @@ export default function NewPost() {
     console.log('5. Start your dev server');
 }
 
-async function integrateDrizzle() {
+async function integrateDrizzle(includeRoutes = true) {
     console.log('Integrating Drizzle ORM following React Router 7 patterns...');
 
     // Step 1: Install Drizzle dependencies
@@ -441,11 +452,12 @@ seed()
     await fs.promises.writeFile('scripts/seed.ts', seedFile);
     console.log('✅ Seed file created');
 
-    // Step 6: Create example routes (matching Prisma structure)
-    console.log('📝 Creating example routes...');
-    await $`mkdir -p app/routes`;
+    // Step 6: Create example routes (optional)
+    if (includeRoutes) {
+        console.log('📝 Creating example routes...');
+        await $`mkdir -p app/routes`;
 
-    // Posts index route
+        // Posts index route
     const postsRoute = `import { db } from "~/db";
 import { posts } from "~/db/schema";
 import { desc } from "drizzle-orm";
@@ -569,8 +581,9 @@ export default function NewPost() {
   );
 }`;
 
-    await fs.promises.writeFile('app/routes/posts.new.tsx', newPostRoute);
-    console.log('✅ Example routes created');
+        await fs.promises.writeFile('app/routes/posts.new.tsx', newPostRoute);
+        console.log('✅ Example routes created');
+    }
 
     // Step 7: Update package.json with Drizzle scripts
     console.log('📝 Updating package.json scripts...');
@@ -1294,10 +1307,12 @@ async function main() {
     
     if (hasArgs) {
         // CLI mode - execute directly
+        const includeRoutes = validatedArgs.routes !== false; // default true, false if explicitly --no-routes
+        
         if (validatedArgs.orm === 'prisma') {
-            await integratePrisma();
+            await integratePrisma(includeRoutes);
         } else if (validatedArgs.orm === 'drizzle') {
-            await integrateDrizzle();
+            await integrateDrizzle(includeRoutes);
         }
 
         if (validatedArgs.auth === 'better-auth') {
@@ -1353,6 +1368,12 @@ async function main() {
                         short: 'None'
                     }
                 ]
+            },
+            {
+                type: 'confirm',
+                name: 'includeRoutes',
+                message: 'Include example routes? (Posts CRUD operations for learning/testing)',
+                default: true
             }
         ]);
 
@@ -1361,14 +1382,14 @@ async function main() {
 
         // Execute selected features
         if (answers.database === 'prisma') {
-            await integratePrisma();
+            await integratePrisma(answers.includeRoutes);
             if (answers.auth !== 'none') {
                 console.log('\n' + '='.repeat(50) + '\n');
             }
         }
         
         if (answers.database === 'drizzle') {
-            await integrateDrizzle();
+            await integrateDrizzle(answers.includeRoutes);
             if (answers.auth !== 'none') {
                 console.log('\n' + '='.repeat(50) + '\n');
             }

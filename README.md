@@ -21,7 +21,7 @@ Run without any arguments to start the interactive menu:
 node script.mjs
 ```
 
-This will prompt you with a checkbox menu to select multiple features at once. Perfect for first-time setup or when you want to add multiple integrations.
+This will prompt you with questions to select your database, authentication, and whether to include example routes. Perfect for first-time setup or when you want to add multiple integrations.
 
 ### Command Line Arguments
 
@@ -51,6 +51,20 @@ Set up authentication with the specified provider.
 **Example:**
 ```bash
 node script.mjs --auth better-auth
+```
+
+#### `-r, --routes`
+
+Include example routes (Posts CRUD operations for learning/testing).
+
+**Options:**
+- `true` (default) - Include example routes
+- `false` - Skip example route generation
+
+**Examples:**
+```bash
+node script.mjs --orm prisma --routes=false
+node script.mjs --db drizzle --no-routes
 ```
 
 ### Prisma Integration
@@ -112,9 +126,9 @@ For production, consider using [Turso](https://turso.tech/) for a scalable SQLit
 node script.mjs
 
 # Example interaction:
-# ✓ 🗄️  Prisma ORM (PostgreSQL)
-# ✓ 🔐  Better Auth
-#   🗃️  Drizzle ORM (SQLite/LibSQL)
+# ? Which database integration would you like to add? 🗄️  Prisma ORM (PostgreSQL)
+# ? Which authentication integration would you like to add? 🔐  Better Auth  
+# ? Include example routes? (Posts CRUD operations for learning/testing) Yes
 ```
 
 ### Command Line Examples
@@ -131,6 +145,9 @@ node script.mjs --auth better-auth
 
 # Combine multiple integrations
 node script.mjs --orm prisma --auth better-auth
+
+# Skip example routes
+node script.mjs --orm drizzle --no-routes
 ```
 
 ### When to Use Each Mode
