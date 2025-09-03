@@ -3,22 +3,28 @@
  * @description Utilities for managing package.json and dependencies
  */
 
-import { readJsonFile, writeJsonFile } from './file-operations.mjs';
+import { readJsonFile, writeJsonFile } from './file-operations.ts';
+
+export interface PackageJsonData {
+    scripts?: Record<string, string>;
+    prisma?: Record<string, unknown>;
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+    [key: string]: unknown;
+}
 
 /**
  * Update package.json scripts safely
- * @param {object} newScripts - Scripts to add/update
- * @returns {Promise<void>}
  */
-export async function updatePackageJsonScripts(newScripts) {
-    const packageJsonData = await readJsonFile('package.json', 'package.json');
+export async function updatePackageJsonScripts(newScripts: Record<string, string>): Promise<void> {
+    const packageJsonData = await readJsonFile('package.json', 'package.json') as PackageJsonData;
 
     // Simple validation - just ensure it's an object
     if (!packageJsonData || typeof packageJsonData !== 'object') {
         throw new Error('Invalid package.json structure');
     }
 
-    const packageJson = {
+    const packageJson: PackageJsonData = {
         ...packageJsonData,
         scripts: {
             ...(packageJsonData.scripts || {}),
@@ -31,18 +37,16 @@ export async function updatePackageJsonScripts(newScripts) {
 
 /**
  * Update package.json prisma configuration
- * @param {object} prismaConfig - Prisma configuration to add/update
- * @returns {Promise<void>}
  */
-export async function updatePackageJsonPrisma(prismaConfig) {
-    const packageJsonData = await readJsonFile('package.json', 'package.json');
+export async function updatePackageJsonPrisma(prismaConfig: Record<string, unknown>): Promise<void> {
+    const packageJsonData = await readJsonFile('package.json', 'package.json') as PackageJsonData;
 
     // Simple validation - just ensure it's an object
     if (!packageJsonData || typeof packageJsonData !== 'object') {
         throw new Error('Invalid package.json structure');
     }
 
-    const packageJson = {
+    const packageJson: PackageJsonData = {
         ...packageJsonData,
         prisma: {
             ...(packageJsonData.prisma || {}),
@@ -55,15 +59,14 @@ export async function updatePackageJsonPrisma(prismaConfig) {
 
 /**
  * Check if dependencies are already installed
- * @param {string[]} dependencies - Array of dependency names to check
- * @returns {Promise<boolean>} True if all dependencies exist
  */
-export async function dependenciesExist(dependencies) {
+export async function dependenciesExist(dependencies: string[]): Promise<boolean> {
     try {
         const packageJsonData = await readJsonFile(
             'package.json',
             'package.json'
-        );
+        ) as PackageJsonData;
+        
         const allDeps = {
             ...(packageJsonData.dependencies || {}),
             ...(packageJsonData.devDependencies || {})

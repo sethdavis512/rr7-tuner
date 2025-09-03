@@ -5,55 +5,50 @@
 
 /**
  * Print a step header with consistent formatting
- * @param {string} message - Step message
  */
-export function printStep(message) {
+export function printStep(message: string): void {
     console.log(`📝 ${message}...`);
 }
 
 /**
  * Print a success message with checkmark
- * @param {string} message - Success message
  */
-export function printSuccess(message) {
+export function printSuccess(message: string): void {
     console.log(`✅ ${message}`);
 }
 
 /**
  * Print an installation step
- * @param {string} message - Installation message
  */
-export function printInstall(message) {
+export function printInstall(message: string): void {
     console.log(`📦 ${message}...`);
 }
 
 /**
  * Print a warning message
- * @param {string} message - Warning message
  */
-export function printWarning(message) {
+export function printWarning(message: string): void {
     console.log(`⚠️  ${message}`);
 }
 
 /**
  * Print an error message
- * @param {string} message - Error message
  */
-export function printError(message) {
+export function printError(message: string): void {
     console.error(`❌ ${message}`);
 }
 
 /**
  * Print a section separator
  */
-export function printSeparator() {
+export function printSeparator(): void {
     console.log('\n' + '='.repeat(50) + '\n');
 }
 
 /**
  * Print the application header
  */
-export function printHeader() {
+export function printHeader(): void {
     console.log('🎛️  React Router 7 Tuner');
     console.log(
         "Welcome! Let's enhance your React Router 7 app with production-ready features.\n"
@@ -62,9 +57,8 @@ export function printHeader() {
 
 /**
  * Print next steps for a given integration
- * @param {string[]} steps - Array of step descriptions
  */
-export function printNextSteps(steps) {
+export function printNextSteps(steps: string[]): void {
     console.log('\n📋 Next Steps:');
     steps.forEach((step, index) => {
         console.log(`${index + 1}. ${step}`);

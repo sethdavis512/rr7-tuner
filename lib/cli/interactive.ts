@@ -5,12 +5,24 @@
 
 import inquirer from 'inquirer';
 
+export interface DatabaseTypeChoice {
+    name: string;
+    value: string;
+    short: string;
+}
+
+export interface InteractiveAnswers {
+    database: 'prisma' | 'drizzle' | 'none';
+    databaseType?: string;
+    auth: 'better-auth' | 'none';
+    includeRoutes: boolean;
+    services: string[];
+}
+
 /**
  * Get database type choices based on ORM selection
- * @param {string} orm - Selected ORM (prisma or drizzle)
- * @returns {Array} Array of database type choices
  */
-function getDatabaseTypeChoices(orm) {
+function getDatabaseTypeChoices(orm: string): DatabaseTypeChoice[] {
     if (orm === 'prisma') {
         return [
             { name: '🐘  PostgreSQL', value: 'postgresql', short: 'PostgreSQL' },
@@ -38,10 +50,9 @@ function getDatabaseTypeChoices(orm) {
 
 /**
  * Prompt user for integration preferences
- * @returns {Promise<object>} User selections
  */
-export async function promptUserPreferences() {
-    const answers = await inquirer.prompt([
+export async function promptUserPreferences(): Promise<InteractiveAnswers> {
+    const answers = await inquirer.prompt<InteractiveAnswers>([
         {
             type: 'list',
             name: 'database',
@@ -67,9 +78,9 @@ export async function promptUserPreferences() {
         {
             type: 'list',
             name: 'databaseType',
-            message: (answers) => `Which ${answers.database === 'prisma' ? 'Prisma' : 'Drizzle'} database type would you like to use?`,
-            choices: (answers) => getDatabaseTypeChoices(answers.database),
-            when: (answers) => answers.database !== 'none'
+            message: (answers: Partial<InteractiveAnswers>) => `Which ${answers.database === 'prisma' ? 'Prisma' : 'Drizzle'} database type would you like to use?`,
+            choices: (answers: Partial<InteractiveAnswers>) => getDatabaseTypeChoices(answers.database || ''),
+            when: (answers: Partial<InteractiveAnswers>) => answers.database !== 'none'
         },
         {
             type: 'list',

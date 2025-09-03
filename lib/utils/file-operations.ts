@@ -5,34 +5,34 @@
 
 import { promises as fs } from 'fs';
 
+export interface RouteConfig {
+    path: string;
+    file: string;
+}
+
 /**
  * Safely parse JSON string with proper error handling
- * @param {string} jsonString - JSON string to parse
- * @param {string} filename - Filename for error context
- * @returns {object} Parsed JSON object
- * @throws {Error} If JSON parsing fails
  */
-export function safeParseJson(jsonString, filename = 'JSON') {
+export function safeParseJson(jsonString: string, filename: string = 'JSON'): unknown {
     try {
         return JSON.parse(jsonString);
     } catch (error) {
-        console.error(`❌ Failed to parse ${filename}:`, error.message);
+        const err = error as Error;
+        console.error(`❌ Failed to parse ${filename}:`, err.message);
         throw new Error(`Invalid JSON in ${filename}`);
     }
 }
 
 /**
  * Safely read and parse a JSON file
- * @param {string} filePath - Path to JSON file
- * @param {string} filename - Filename for error context
- * @returns {Promise<object>} Parsed JSON object
  */
-export async function readJsonFile(filePath, filename = 'file') {
+export async function readJsonFile(filePath: string, filename: string = 'file'): Promise<unknown> {
     try {
         const content = await fs.readFile(filePath, 'utf8');
         return safeParseJson(content, filename);
     } catch (error) {
-        if (error.code === 'ENOENT') {
+        const err = error as NodeJS.ErrnoException;
+        if (err.code === 'ENOENT') {
             throw new Error(`${filename} not found at ${filePath}`);
         }
         throw error;
@@ -41,26 +41,22 @@ export async function readJsonFile(filePath, filename = 'file') {
 
 /**
  * Safely write JSON file with proper formatting
- * @param {string} filePath - Path to write file
- * @param {object} data - Data to write
- * @returns {Promise<void>}
  */
-export async function writeJsonFile(filePath, data) {
+export async function writeJsonFile(filePath: string, data: unknown): Promise<void> {
     const content = JSON.stringify(data, null, 2);
     await fs.writeFile(filePath, content);
 }
 
 /**
  * Ensure directory exists, create if it doesn't
- * @param {string} dirPath - Directory path to ensure
- * @returns {Promise<void>}
  */
-export async function ensureDirectory(dirPath) {
+export async function ensureDirectory(dirPath: string): Promise<void> {
     try {
         await fs.mkdir(dirPath, { recursive: true });
     } catch (error) {
+        const err = error as NodeJS.ErrnoException;
         // Directory already exists, ignore error
-        if (error.code !== 'EEXIST') {
+        if (err.code !== 'EEXIST') {
             throw error;
         }
     }
@@ -68,10 +64,8 @@ export async function ensureDirectory(dirPath) {
 
 /**
  * Check if a file exists
- * @param {string} filePath - Path to check
- * @returns {Promise<boolean>} True if file exists
  */
-export async function fileExists(filePath) {
+export async function fileExists(filePath: string): Promise<boolean> {
     try {
         await fs.access(filePath);
         return true;
@@ -82,10 +76,8 @@ export async function fileExists(filePath) {
 
 /**
  * Update routes.ts file with new route configurations
- * @param {Array<{path: string, file: string}>} newRoutes - Array of route configurations to add
- * @returns {Promise<void>}
  */
-export async function updateRoutesFile(newRoutes) {
+export async function updateRoutesFile(newRoutes: RouteConfig[]): Promise<void> {
     const routesPath = 'app/routes.ts';
     
     // Only proceed if routes.ts exists
@@ -114,7 +106,7 @@ export async function updateRoutesFile(newRoutes) {
         });
         
         // Combine existing and new routes
-        let allRoutes = [];
+        const allRoutes: string[] = [];
         if (existingRoutesContent) {
             allRoutes.push(existingRoutesContent);
         }
@@ -122,8 +114,12 @@ export async function updateRoutesFile(newRoutes) {
         
         // Check if we need to import 'route' function
         const needsRouteImport = newRoutes.some(r => r.path !== '/');
-        let importStatement = content.match(/import.*from "@react-router\/dev\/routes";/)[0];
+        const importMatch = content.match(/import.*from "@react-router\/dev\/routes";/);
+        if (!importMatch) {
+            throw new Error('Could not find import statement for routes');
+        }
         
+        let importStatement = importMatch[0];
         if (needsRouteImport && !importStatement.includes('route')) {
             importStatement = importStatement.replace(
                 'index',
@@ -138,7 +134,8 @@ export default [${allRoutes.join(',\n  ')}] satisfies RouteConfig;`;
         
         await fs.writeFile(routesPath, newContent);
     } catch (error) {
-        console.error('❌ Failed to update routes.ts:', error.message);
+        const err = error as Error;
+        console.error('❌ Failed to update routes.ts:', err.message);
         throw error;
     }
 }

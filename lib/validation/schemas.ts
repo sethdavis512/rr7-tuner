@@ -67,3 +67,8 @@ export const IntegrationOptionsSchema = z.object({
     database: z.enum(['prisma', 'drizzle']).optional(),
     auth: z.enum(['better-auth']).optional()
 });
+
+export type PackageJson = z.infer<typeof PackageJsonSchema>;
+export type CliArgs = z.infer<typeof CliArgsSchema>;
+export type InquirerAnswers = z.infer<typeof InquirerAnswersSchema>;
+export type IntegrationOptions = z.infer<typeof IntegrationOptionsSchema>;
