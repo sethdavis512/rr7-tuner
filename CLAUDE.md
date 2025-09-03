@@ -4,20 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-RR7 Tuner is a React Router 7 enhancement CLI tool that adds production-ready integrations (Prisma, Drizzle, Better Auth) to React Router 7 applications. The tool generates code following official tutorials exactly.
+RR7 Tuner is a React Router 7 enhancement CLI tool that adds production-ready integrations (Prisma, Drizzle, Better Auth) to React Router 7 applications. The tool generates database-specific code following official tutorials exactly.
 
 ## Commands
 
 ### Primary Usage
 ```bash
-# Run the tool
+# Run the tool (interactive mode)
 node script.mjs
 
 # CLI mode with specific integrations
-node script.mjs --orm prisma
-node script.mjs --db drizzle  
+node script.mjs --orm prisma --database-type postgresql
+node script.mjs --db drizzle --dt turso
 node script.mjs --auth better-auth
-node script.mjs --orm prisma --auth better-auth
+node script.mjs --orm prisma --database-type mysql --auth better-auth --no-routes
+
+# Test functionality
+node script.mjs --help
+node script.mjs --version
+node --check script.mjs
 ```
 
 ### Development Dependencies
@@ -51,11 +56,15 @@ script.mjs                 # Entry point with error handling
 ```
 
 ### Key Integration Functions
-- `integratePrisma(includeRoutes)` - PostgreSQL with Prisma ORM following official React Router 7 guide
-- `integrateDrizzle(includeRoutes)` - SQLite/LibSQL with Drizzle ORM  
+- `integratePrisma(includeRoutes, databaseType)` - Supports PostgreSQL, MySQL, SQLite, MongoDB, SQL Server, CockroachDB
+- `integrateDrizzle(includeRoutes, databaseType)` - Supports PostgreSQL, MySQL, SQLite variants (Turso, D1, Neon, PlanetScale, etc.)
 - `integrateBetterAuthWithPrisma()` - Better Auth with Prisma adapter
 - `integrateBetterAuthWithDrizzle()` - Better Auth with Drizzle adapter
 - `integrateBetterAuth()` - Standalone Better Auth setup
+
+### Database Type Support Matrix
+**Prisma** (6 types): `postgresql`, `mysql`, `sqlite`, `mongodb`, `sqlserver`, `cockroachdb`
+**Drizzle** (9 types): `postgres`, `neon`, `vercel-postgres`, `supabase`, `mysql`, `planetscale`, `sqlite`, `turso`, `d1`
 
 ### Enterprise Patterns
 - **Modular design**: Each concern separated into dedicated modules
@@ -66,8 +75,9 @@ script.mjs                 # Entry point with error handling
 
 ### Code Generation Patterns  
 - **Tutorial compliance**: Generated code matches official documentation exactly
+- **Database-specific generation**: Schema, connection, and config code tailored to chosen database type
 - **File system operations**: Creates directories, writes files, updates package.json
-- **Database setup**: Schema files, connection configs, seed scripts
+- **Smart dependency installation**: Installs correct database drivers based on database type selection
 - **Route generation**: Complete CRUD examples with proper React Router 7 patterns
 - **Authentication pages**: Signup, signin, dashboard routes for Better Auth
 
@@ -103,6 +113,21 @@ script.mjs                 # Entry point with error handling
 
 - **No generated code validation**: Don't add validation to code snippets that get dropped into user codebases
 - **React Router 7 patterns**: Generated routes use loaders/actions, not hooks like useLoaderData
-- **Database assumptions**: Prisma uses PostgreSQL, Drizzle uses SQLite/LibSQL with Turso for production
+- **Database type consistency**: Ensure database-specific imports, schemas, and configs match the selected type
 - **Package.json safety**: Always validate and preserve existing scripts when updating
 - **Module imports**: Use relative imports for local modules, absolute for npm packages
+- **ORM-specific validation**: Prisma and Drizzle database types use different naming conventions and must be mapped correctly
+
+## CLI Argument Structure
+
+```bash
+# Full CLI syntax
+node script.mjs [--orm|--db <orm>] [--database-type|--dt <type>] [--auth <auth>] [--routes|--no-routes|-r]
+
+# Interactive flow
+node script.mjs
+# → Choose ORM (prisma/drizzle/none)  
+# → Choose database type (dynamic based on ORM)
+# → Choose auth (better-auth/none)
+# → Choose routes (yes/no)
+```

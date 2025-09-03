@@ -21,7 +21,7 @@ Run without any arguments to start the interactive menu:
 node script.mjs
 ```
 
-This will prompt you with questions to select your ORM, specific database type, authentication, and whether to include example routes. Perfect for first-time setup or when you want to explore different database options.
+This will prompt you with questions to select your ORM, specific database type, authentication, additional services (like Polar.sh), and whether to include example routes. Perfect for first-time setup or when you want to explore different integration options.
 
 ### Command Line Arguments
 
@@ -88,6 +88,21 @@ Set up authentication with the specified provider.
 node script.mjs --auth better-auth
 ```
 
+#### `-s, --services`
+
+Include additional service integrations.
+
+**Options:**
+- `polar` - Polar.sh payments and subscriptions integration
+
+**Examples:**
+
+```bash
+node script.mjs --services polar
+node script.mjs --auth better-auth --services polar
+node script.mjs -s polar
+```
+
 #### `-r, --routes`
 
 Include example routes (Posts CRUD operations for learning/testing).
@@ -149,6 +164,29 @@ When you run `node script.mjs --orm drizzle`, the script will:
 
 For production, consider using [Turso](https://turso.tech/) for a scalable SQLite solution.
 
+### Polar.sh Integration
+
+When you run `node script.mjs --services polar`, the script will:
+
+1. Install required dependencies (`@polar-sh/sdk`, `@polar-sh/better-auth`)
+2. Update Better Auth configuration with Polar plugin
+3. Add Polar client configuration for checkout and customer portal
+4. Create React Router 7 routes:
+   - `/success` - Checkout success page
+   - `/portal` - Customer portal redirect
+   - `/upgrade` - Upgrade/checkout page
+5. Update `.env.example` with Polar configuration variables
+
+### Next Steps After Polar.sh Setup
+
+1. Create a Polar.sh account at [polar.sh](https://polar.sh)
+2. Get your access token from dashboard settings
+3. Set up webhook endpoints for payment events
+4. Configure your products and pricing
+5. Update environment variables in `.env` file
+
+Polar.sh provides checkout, customer portal, usage tracking, and webhooks for React Router 7 applications.
+
 ### Other Options
 
 - `--help` - Show help information
@@ -163,8 +201,10 @@ For production, consider using [Turso](https://turso.tech/) for a scalable SQLit
 node script.mjs
 
 # Example interaction:
-# ? Which database integration would you like to add? 🗄️  Prisma ORM (PostgreSQL)
+# ? Which database integration would you like to add? 🗄️  Prisma ORM
+# ? Which Prisma database type would you like to use? 🐘  PostgreSQL
 # ? Which authentication integration would you like to add? 🔐  Better Auth  
+# ? Which additional services would you like to integrate? 💰 Polar.sh (Payments & Subscriptions)
 # ? Include example routes? (Posts CRUD operations for learning/testing) Yes
 ```
 
@@ -190,8 +230,11 @@ node script.mjs --db drizzle --dt neon
 # Skip example routes
 node script.mjs --orm drizzle --no-routes
 
+# Include services
+node script.mjs --auth better-auth --services polar
+
 # Full example with all options
-node script.mjs --orm drizzle --database-type planetscale --auth better-auth --no-routes
+node script.mjs --orm drizzle --database-type planetscale --auth better-auth --services polar --no-routes
 ```
 
 ### When to Use Each Mode
