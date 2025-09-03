@@ -13,7 +13,7 @@ export interface RouteConfig {
 /**
  * Safely parse JSON string with proper error handling
  */
-export function safeParseJson(jsonString: string, filename: string = 'JSON'): unknown {
+function safeParseJson(jsonString: string, filename: string = 'JSON'): unknown {
     try {
         return JSON.parse(jsonString);
     } catch (error) {
@@ -47,20 +47,6 @@ export async function writeJsonFile(filePath: string, data: unknown): Promise<vo
     await fs.writeFile(filePath, content);
 }
 
-/**
- * Ensure directory exists, create if it doesn't
- */
-export async function ensureDirectory(dirPath: string): Promise<void> {
-    try {
-        await fs.mkdir(dirPath, { recursive: true });
-    } catch (error) {
-        const err = error as NodeJS.ErrnoException;
-        // Directory already exists, ignore error
-        if (err.code !== 'EEXIST') {
-            throw error;
-        }
-    }
-}
 
 /**
  * Check if a file exists

@@ -4,28 +4,11 @@
  */
 
 import {
-    PackageJsonSchema,
     CliArgsSchema,
     InquirerAnswersSchema,
-    IntegrationOptionsSchema,
-    type PackageJson,
     type CliArgs,
-    type InquirerAnswers,
-    type IntegrationOptions
+    type InquirerAnswers
 } from './schemas.ts';
-
-/**
- * Validates package.json data structure
- */
-export function validatePackageJson(data: unknown): PackageJson {
-    try {
-        return PackageJsonSchema.parse(data);
-    } catch (error) {
-        const err = error as Error;
-        console.error('❌ Invalid package.json structure:', err.message);
-        throw new Error('Failed to parse package.json. Please ensure it has valid JSON structure.');
-    }
-}
 
 /**
  * Validates CLI arguments from yargs
@@ -53,15 +36,3 @@ export function validateInquirerAnswers(answers: unknown): InquirerAnswers {
     }
 }
 
-/**
- * Validates integration options
- */
-export function validateIntegrationOptions(options: unknown): IntegrationOptions {
-    try {
-        return IntegrationOptionsSchema.parse(options);
-    } catch (error) {
-        const err = error as Error;
-        console.error('❌ Invalid integration options:', err.message);
-        throw new Error('Invalid integration options provided.');
-    }
-}

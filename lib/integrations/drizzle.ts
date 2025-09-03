@@ -4,7 +4,7 @@
  */
 
 export async function integrateDrizzle(
-    includeRoutes: boolean = true,
+    _includeRoutes: boolean = true,
     databaseType: string = 'turso'
 ): Promise<void> {
     console.log(`Integrating Drizzle ORM with ${databaseType.toUpperCase()}...`);

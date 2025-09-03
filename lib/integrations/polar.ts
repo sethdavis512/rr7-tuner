@@ -3,7 +3,7 @@
  * @description Complete Polar.sh setup with Better Auth adapter for payments and subscriptions
  */
 
-export async function integratePolar(authType: string = 'better-auth'): Promise<void> {
+export async function integratePolar(_authType: string = 'better-auth'): Promise<void> {
     console.log('Integrating Polar.sh payments and subscriptions...');
     // TODO: Implement Polar.sh integration
 }

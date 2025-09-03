@@ -6,18 +6,6 @@
 import { z } from 'zod';
 
 /**
- * Schema for validating package.json structure
- */
-export const PackageJsonSchema = z.object({
-    scripts: z.record(z.string(), z.string()).default({}),
-    dependencies: z.record(z.string(), z.string()).optional(),
-    devDependencies: z.record(z.string(), z.string()).optional(),
-    prisma: z.object({
-        seed: z.string().optional()
-    }).optional()
-});
-
-/**
  * Schema for validating CLI arguments from yargs
  */
 export const CliArgsSchema = z.object({
@@ -59,16 +47,5 @@ export const InquirerAnswersSchema = z.object({
     services: z.array(z.enum(['polar'])).default([])
 });
 
-/**
- * Schema for validating integration options
- */
-export const IntegrationOptionsSchema = z.object({
-    includeRoutes: z.boolean().default(true),
-    database: z.enum(['prisma', 'drizzle']).optional(),
-    auth: z.enum(['better-auth']).optional()
-});
-
-export type PackageJson = z.infer<typeof PackageJsonSchema>;
 export type CliArgs = z.infer<typeof CliArgsSchema>;
 export type InquirerAnswers = z.infer<typeof InquirerAnswersSchema>;
-export type IntegrationOptions = z.infer<typeof IntegrationOptionsSchema>;
