@@ -43,7 +43,8 @@ lib/
 ├── integrations/
 │   ├── prisma.mjs         # Complete Prisma setup
 │   ├── drizzle.mjs        # Complete Drizzle setup
-│   └── better-auth.mjs    # Better Auth with all adapters
+│   ├── better-auth.mjs    # Better Auth with all adapters
+│   └── polar.mjs          # Polar.sh payments integration
 ├── utils/
 │   ├── console.mjs        # Consistent output formatting
 │   ├── file-operations.mjs # Safe file I/O operations
@@ -61,6 +62,7 @@ script.mjs                 # Entry point with error handling
 - `integrateBetterAuthWithPrisma()` - Better Auth with Prisma adapter
 - `integrateBetterAuthWithDrizzle()` - Better Auth with Drizzle adapter
 - `integrateBetterAuth()` - Standalone Better Auth setup
+- `integratePolar(authType)` - Polar.sh payments integration with Better Auth
 
 ### Database Type Support Matrix
 **Prisma** (6 types): `postgresql`, `mysql`, `sqlite`, `mongodb`, `sqlserver`, `cockroachdb`
@@ -80,12 +82,33 @@ script.mjs                 # Entry point with error handling
 - **Smart dependency installation**: Installs correct database drivers based on database type selection
 - **Route generation**: Complete CRUD examples with proper React Router 7 patterns
 - **Authentication pages**: Signup, signin, dashboard routes for Better Auth
+- **Payment routes**: Checkout success, customer portal, and upgrade pages for Polar.sh
+- **Automatic route registration**: Generated routes are automatically registered in `app/routes.ts` if it exists
 
 ### Integration Philosophy
 - **Official tutorial adherence**: Prisma integration follows https://www.prisma.io/docs/guides/react-router-7 exactly
 - **Technology-specific patterns**: Drizzle uses "the Drizzle way" while maintaining equivalent functionality
 - **Adapter-aware auth**: Better Auth automatically selects correct database adapter based on ORM choice
 - **Clean generated code**: No validation utilities in user-facing code snippets
+
+### Route Registration System
+The tool includes automatic route registration functionality that integrates generated routes into React Router 7's configuration:
+
+- **Conditional registration**: Only updates `app/routes.ts` if the file already exists
+- **Append-only approach**: New routes are added to existing configuration without replacement
+- **Import management**: Automatically adds `route` import when needed for non-index routes
+- **Integration-specific routes**:
+  - **ORM routes**: `/posts`, `/posts/:postId`, `/posts/new` (for both Prisma and Drizzle)
+  - **Auth routes**: `/signup`, `/signin`, `/dashboard` (for Better Auth)
+  - **Payment routes**: `/success`, `/portal`, `/upgrade` (for Polar.sh)
+
+### Smart Detection Features
+All integrations include intelligent detection to prevent redundant operations:
+
+- **Dependency checking**: Verifies if required packages are already installed before running `npm install`
+- **File existence checks**: Skips file creation if target files already exist
+- **Configuration validation**: Checks for existing scripts in package.json before updating
+- **Schema detection**: Validates existing database schemas and configurations
 
 ## Development Guidelines
 
@@ -102,6 +125,7 @@ script.mjs                 # Entry point with error handling
 2. Use consistent console output from `lib/utils/console.mjs`
 3. Leverage file operation utilities from `lib/utils/file-operations.mjs`
 4. Update package.json safely using `lib/utils/package-manager.mjs`
+5. Use `updateRoutesFile()` to register generated routes in `app/routes.ts`
 
 ### File Organization Principles
 - **Single Responsibility**: Each module handles one specific concern
@@ -117,17 +141,20 @@ script.mjs                 # Entry point with error handling
 - **Package.json safety**: Always validate and preserve existing scripts when updating
 - **Module imports**: Use relative imports for local modules, absolute for npm packages
 - **ORM-specific validation**: Prisma and Drizzle database types use different naming conventions and must be mapped correctly
+- **Route registration**: Only register routes in `app/routes.ts` if the file already exists, append to existing routes without replacement
+- **Smart detection**: Check for existing files, dependencies, and configurations to prevent redundant setup operations
 
 ## CLI Argument Structure
 
 ```bash
 # Full CLI syntax
-node script.mjs [--orm|--db <orm>] [--database-type|--dt <type>] [--auth <auth>] [--routes|--no-routes|-r]
+node script.mjs [--orm|--db <orm>] [--database-type|--dt <type>] [--auth <auth>] [--services|-s <service>] [--routes|--no-routes|-r]
 
 # Interactive flow
 node script.mjs
 # → Choose ORM (prisma/drizzle/none)  
 # → Choose database type (dynamic based on ORM)
 # → Choose auth (better-auth/none)
+# → Choose services (polar/none)
 # → Choose routes (yes/no)
 ```

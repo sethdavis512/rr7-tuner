@@ -5,9 +5,13 @@ A React Router 7 enhancement tool that helps you add production-ready features t
 ## Features
 
 - **Prisma Integration**: Complete setup following the [official Prisma React Router 7 guide](https://www.prisma.io/docs/guides/react-router-7)
-- **Database Support**: PostgreSQL with Prisma Accelerate extension
-- **Example Routes**: Full CRUD operations with Posts model
-- **TypeScript Support**: Proper types and configuration
+- **Drizzle Integration**: SQLite/LibSQL setup with multiple database provider support  
+- **Better Auth Integration**: Secure authentication with database adapters and OAuth support
+- **Polar.sh Integration**: Payments and subscriptions with Better Auth integration
+- **Automatic Route Registration**: Generated routes are automatically registered in `app/routes.ts`
+- **Smart Detection**: Prevents redundant setups by checking existing files and dependencies
+- **Example Routes**: Full CRUD operations and authentication flows
+- **TypeScript Support**: Proper types and configuration throughout
 
 ## Usage
 
@@ -132,7 +136,8 @@ When you run `node script.mjs --orm prisma`, the script will:
    - `app/routes/posts.tsx` - List all posts
    - `app/routes/posts.$postId.tsx` - View single post
    - `app/routes/posts.new.tsx` - Create new post
-7. Update `package.json` with Prisma scripts
+7. Register routes in `app/routes.ts` (if it exists)
+8. Update `package.json` with Prisma scripts
 
 ### Next Steps After Prisma Setup
 
@@ -152,8 +157,9 @@ When you run `node script.mjs --orm drizzle`, the script will:
 4. Set up database connection in `app/db/index.ts`
 5. Create seed file in `scripts/seed.ts`
 6. Generate the same example routes as Prisma but using Drizzle syntax
-7. Update `package.json` with Drizzle scripts
-8. Create `.env.example` template
+7. Register routes in `app/routes.ts` (if it exists)
+8. Update `package.json` with Drizzle scripts
+9. Create `.env.example` template
 
 ### Next Steps After Drizzle Setup
 
@@ -163,6 +169,29 @@ When you run `node script.mjs --orm drizzle`, the script will:
 4. Start your development server
 
 For production, consider using [Turso](https://turso.tech/) for a scalable SQLite solution.
+
+### Better Auth Integration
+
+When you run `node script.mjs --auth better-auth`, the script will:
+
+1. Install Better Auth dependencies (`better-auth`)
+2. Create server-side auth configuration with database adapter
+3. Create client-side auth configuration
+4. Generate authentication pages:
+   - `/signup` - User registration page
+   - `/signin` - User login page
+   - `/dashboard` - Protected user dashboard
+5. Register routes in `app/routes.ts` (if it exists)
+6. Create API route handler at `/api/auth/*`
+
+### Next Steps After Better Auth Setup
+
+1. Configure your authentication providers in the auth config
+2. Set up environment variables for OAuth providers (if using)
+3. Run database migrations to create auth tables
+4. Start your development server and test authentication flow
+
+Better Auth provides secure authentication with support for multiple providers, sessions, and database adapters.
 
 ### Polar.sh Integration
 
@@ -175,7 +204,8 @@ When you run `node script.mjs --services polar`, the script will:
    - `/success` - Checkout success page
    - `/portal` - Customer portal redirect
    - `/upgrade` - Upgrade/checkout page
-5. Update `.env.example` with Polar configuration variables
+5. Register routes in `app/routes.ts` (if it exists)
+6. Update `.env.example` with Polar configuration variables
 
 ### Next Steps After Polar.sh Setup
 
