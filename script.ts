@@ -1,4 +1,4 @@
-#!/usr/bin/env zx
+#!/usr/bin/env bun
 
 /**
  * @fileoverview RR7 Tuner - React Router 7 Enhancement Tool
@@ -15,22 +15,23 @@
  * @author Seth Davis <sethdavis512@gmail.com>
  */
 
-import { run } from './lib/orchestrator.mjs';
+import { run } from './lib/orchestrator.ts';
 
 /**
  * Main entry point with error handling
  */
-async function main() {
+async function main(): Promise<void> {
     try {
         await run();
     } catch (error) {
-        console.error('❌ Script execution failed:', error.message);
+        const err = error as Error;
+        console.error('❌ Script execution failed:', err.message);
         console.error('\n🔍 Debug information:');
-        console.error(error.stack);
+        console.error(err.stack);
         console.error('\n💡 Common fixes:');
         console.error('- Ensure you are running this in a React Router 7 project directory');
         console.error('- Check that you have write permissions in this directory');
-        console.error('- Verify your Node.js version is 18+ and npm is installed');
+        console.error('- Verify your Bun version is up to date');
         console.error('- Make sure your package.json exists and is valid JSON');
         process.exit(1);
     }

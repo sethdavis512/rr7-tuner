@@ -22,7 +22,7 @@ The tool supports both **interactive mode** and **command line arguments** for m
 Run without any arguments to start the interactive menu:
 
 ```bash
-node script.mjs
+bun script.ts
 ```
 
 This will prompt you with questions to select your ORM, specific database type, authentication, additional services (like Polar.sh), and whether to include example routes. Perfect for first-time setup or when you want to explore different integration options.
@@ -43,8 +43,8 @@ Set up database integration with the specified ORM.
 **Example:**
 
 ```bash
-node script.mjs --orm prisma
-node script.mjs --db drizzle
+bun script.ts --orm prisma
+bun script.ts --db drizzle
 ```
 
 #### `--database-type` / `--dt`
@@ -73,9 +73,9 @@ Specify the exact database type/provider to use with your chosen ORM.
 **Examples:**
 
 ```bash
-node script.mjs --orm prisma --database-type mysql
-node script.mjs --db drizzle --dt neon
-node script.mjs --orm prisma --database-type mongodb
+bun script.ts --orm prisma --database-type mysql
+bun script.ts --db drizzle --dt neon
+bun script.ts --orm prisma --database-type mongodb
 ```
 
 #### `--auth`
@@ -89,7 +89,7 @@ Set up authentication with the specified provider.
 **Example:**
 
 ```bash
-node script.mjs --auth better-auth
+bun script.ts --auth better-auth
 ```
 
 #### `-s, --services`
@@ -102,9 +102,9 @@ Include additional service integrations.
 **Examples:**
 
 ```bash
-node script.mjs --services polar
-node script.mjs --auth better-auth --services polar
-node script.mjs -s polar
+bun script.ts --services polar
+bun script.ts --auth better-auth --services polar
+bun script.ts -s polar
 ```
 
 #### `-r, --routes`
@@ -119,13 +119,13 @@ Include example routes (Posts CRUD operations for learning/testing).
 **Examples:**
 
 ```bash
-node script.mjs --orm prisma --routes=false
-node script.mjs --db drizzle --no-routes
+bun script.ts --orm prisma --routes=false
+bun script.ts --db drizzle --no-routes
 ```
 
 ### Prisma Integration
 
-When you run `node script.mjs --orm prisma`, the script will:
+When you run `bun script.ts --orm prisma`, the script will:
 
 1. Install required dependencies (`prisma`, `@prisma/client`, `@prisma/extension-accelerate`)
 2. Initialize Prisma with `npx prisma init`
@@ -149,7 +149,7 @@ When you run `node script.mjs --orm prisma`, the script will:
 
 ### Drizzle Integration
 
-When you run `node script.mjs --orm drizzle`, the script will:
+When you run `bun script.ts --orm drizzle`, the script will:
 
 1. Install required dependencies (`drizzle-orm`, `drizzle-kit`, `@libsql/client`, etc.)
 2. Create `drizzle.config.ts` for configuration
@@ -172,7 +172,7 @@ For production, consider using [Turso](https://turso.tech/) for a scalable SQLit
 
 ### Better Auth Integration
 
-When you run `node script.mjs --auth better-auth`, the script will:
+When you run `bun script.ts --auth better-auth`, the script will:
 
 1. Install Better Auth dependencies (`better-auth`)
 2. Create server-side auth configuration with database adapter
@@ -195,7 +195,7 @@ Better Auth provides secure authentication with support for multiple providers, 
 
 ### Polar.sh Integration
 
-When you run `node script.mjs --services polar`, the script will:
+When you run `bun script.ts --services polar`, the script will:
 
 1. Install required dependencies (`@polar-sh/sdk`, `@polar-sh/better-auth`)
 2. Update Better Auth configuration with Polar plugin
@@ -228,7 +228,7 @@ Polar.sh provides checkout, customer portal, usage tracking, and webhooks for Re
 
 ```bash
 # Start interactive mode - choose multiple features with checkboxes
-node script.mjs
+bun script.ts
 
 # Example interaction:
 # ? Which database integration would you like to add? 🗄️  Prisma ORM
@@ -242,29 +242,29 @@ node script.mjs
 
 ```bash
 # Set up Prisma (follows official tutorial exactly)
-node script.mjs --orm prisma
+bun script.ts --orm prisma
 
 # Set up Drizzle
-node script.mjs --db drizzle
+bun script.ts --db drizzle
 
 # Set up Better Auth
-node script.mjs --auth better-auth
+bun script.ts --auth better-auth
 
 # Combine multiple integrations
-node script.mjs --orm prisma --auth better-auth
+bun script.ts --orm prisma --auth better-auth
 
 # Specify database type
-node script.mjs --orm prisma --database-type mysql
-node script.mjs --db drizzle --dt neon
+bun script.ts --orm prisma --database-type mysql
+bun script.ts --db drizzle --dt neon
 
 # Skip example routes
-node script.mjs --orm drizzle --no-routes
+bun script.ts --orm drizzle --no-routes
 
 # Include services
-node script.mjs --auth better-auth --services polar
+bun script.ts --auth better-auth --services polar
 
 # Full example with all options
-node script.mjs --orm drizzle --database-type planetscale --auth better-auth --services polar --no-routes
+bun script.ts --orm drizzle --database-type planetscale --auth better-auth --services polar --no-routes
 ```
 
 ### When to Use Each Mode

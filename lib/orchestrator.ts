@@ -1,29 +1,26 @@
-#!/usr/bin/env zx
-
 /**
  * @fileoverview Main orchestrator for RR7 Tuner
  * @description Coordinates CLI and interactive modes, executes integrations
  */
 
 import { promises as fs } from 'fs';
-import { parseCliArguments } from './cli/arguments.mjs';
-import { promptUserPreferences } from './cli/interactive.mjs';
-import { validateCliArgs, validateInquirerAnswers } from './validation/validators.mjs';
-import { integratePrisma } from './integrations/prisma.mjs';
-import { integrateDrizzle } from './integrations/drizzle.mjs';
+import { parseCliArguments, type CliArguments } from './cli/arguments.ts';
+import { promptUserPreferences, type InteractiveAnswers } from './cli/interactive.ts';
+import { validateCliArgs, validateInquirerAnswers } from './validation/validators.ts';
+import { integratePrisma } from './integrations/prisma.ts';
+import { integrateDrizzle } from './integrations/drizzle.ts';
 import { 
     integrateBetterAuthWithPrisma, 
     integrateBetterAuthWithDrizzle, 
     integrateBetterAuth 
-} from './integrations/better-auth.mjs';
-import { integratePolar } from './integrations/polar.mjs';
-import { printHeader, printSeparator, printError } from './utils/console.mjs';
+} from './integrations/better-auth.ts';
+import { integratePolar } from './integrations/polar.ts';
+import { printHeader, printSeparator, printError } from './utils/console.ts';
 
 /**
  * Main orchestration function
- * @returns {Promise<void>}
  */
-export async function run() {
+export async function run(): Promise<void> {
     printHeader();
 
     // Validate environment
@@ -45,9 +42,8 @@ export async function run() {
 
 /**
  * Validate the current environment
- * @returns {Promise<void>}
  */
-async function validateEnvironment() {
+async function validateEnvironment(): Promise<void> {
     try {
         await fs.readFile('package.json', 'utf8');
     } catch (error) {
@@ -59,10 +55,8 @@ async function validateEnvironment() {
 
 /**
  * Execute CLI mode with provided arguments
- * @param {object} args - Validated CLI arguments
- * @returns {Promise<void>}
  */
-async function executeCliMode(args) {
+async function executeCliMode(args: CliArguments): Promise<void> {
     console.log('🚀 Running in CLI mode...\n');
 
     const includeRoutes = args.routes !== false;
@@ -108,9 +102,8 @@ async function executeCliMode(args) {
 
 /**
  * Execute interactive mode with prompts
- * @returns {Promise<void>}
  */
-async function executeInteractiveMode() {
+async function executeInteractiveMode(): Promise<void> {
     console.log('🎯 Running in interactive mode...\n');
 
     // Get user preferences

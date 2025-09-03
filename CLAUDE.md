@@ -11,24 +11,26 @@ RR7 Tuner is a React Router 7 enhancement CLI tool that adds production-ready in
 ### Primary Usage
 ```bash
 # Run the tool (interactive mode)
-node script.mjs
+bun script.ts
 
 # CLI mode with specific integrations
-node script.mjs --orm prisma --database-type postgresql
-node script.mjs --db drizzle --dt turso
-node script.mjs --auth better-auth
-node script.mjs --orm prisma --database-type mysql --auth better-auth --no-routes
+bun script.ts --orm prisma --database-type postgresql
+bun script.ts --db drizzle --dt turso
+bun script.ts --auth better-auth
+bun script.ts --orm prisma --database-type mysql --auth better-auth --no-routes
 
 # Test functionality
-node script.mjs --help
-node script.mjs --version
-node --check script.mjs
+bun script.ts --help
+bun script.ts --version
+bun --check script.ts
 ```
 
 ### Development Dependencies
-- No test runner configured (package.json shows placeholder test script)
-- Uses zx for shell scripting with Node.js
-- Dependencies: inquirer, yargs, zod, zx
+- Uses Bun runtime with native TypeScript support
+- Built-in test runner with `bun test`
+- TypeScript configuration optimized for Bun
+- Dependencies: inquirer, yargs, zod
+- Dev Dependencies: typescript, @types/*, bun-types
 
 ## Architecture
 
@@ -38,22 +40,22 @@ The codebase follows enterprise-ready patterns with clear separation of concerns
 ```
 lib/
 ├── cli/
-│   ├── arguments.mjs       # CLI argument parsing (yargs)
-│   └── interactive.mjs     # Interactive prompts (inquirer)
+│   ├── arguments.ts        # CLI argument parsing (yargs)
+│   └── interactive.ts      # Interactive prompts (inquirer)
 ├── integrations/
-│   ├── prisma.mjs         # Complete Prisma setup
-│   ├── drizzle.mjs        # Complete Drizzle setup
-│   ├── better-auth.mjs    # Better Auth with all adapters
-│   └── polar.mjs          # Polar.sh payments integration
+│   ├── prisma.ts          # Complete Prisma setup
+│   ├── drizzle.ts         # Complete Drizzle setup
+│   ├── better-auth.ts     # Better Auth with all adapters
+│   └── polar.ts           # Polar.sh payments integration
 ├── utils/
-│   ├── console.mjs        # Consistent output formatting
-│   ├── file-operations.mjs # Safe file I/O operations
-│   └── package-manager.mjs # Package.json manipulation
+│   ├── console.ts         # Consistent output formatting
+│   ├── file-operations.ts # Safe file I/O operations
+│   └── package-manager.ts # Package.json manipulation
 ├── validation/
-│   ├── schemas.mjs        # Zod validation schemas
-│   └── validators.mjs     # Validation functions
-└── orchestrator.mjs       # Main coordination logic
-script.mjs                 # Entry point with error handling
+│   ├── schemas.ts         # Zod validation schemas
+│   └── validators.ts      # Validation functions
+└── orchestrator.ts        # Main coordination logic
+script.ts                  # Entry point with error handling
 ```
 
 ### Key Integration Functions
@@ -70,7 +72,8 @@ script.mjs                 # Entry point with error handling
 
 ### Enterprise Patterns
 - **Modular design**: Each concern separated into dedicated modules
-- **Type safety**: JSDoc annotations throughout for better IDE support
+- **Type safety**: Full TypeScript with strict typing throughout
+- **Runtime performance**: Bun's fast JavaScript runtime for better performance
 - **Error handling**: Comprehensive error handling with user-friendly messages
 - **Validation layer**: Zod schemas for all inputs and operations
 - **Consistent logging**: Standardized console output with emojis and formatting
@@ -148,10 +151,10 @@ All integrations include intelligent detection to prevent redundant operations:
 
 ```bash
 # Full CLI syntax
-node script.mjs [--orm|--db <orm>] [--database-type|--dt <type>] [--auth <auth>] [--services|-s <service>] [--routes|--no-routes|-r]
+bun script.ts [--orm|--db <orm>] [--database-type|--dt <type>] [--auth <auth>] [--services|-s <service>] [--routes|--no-routes|-r]
 
 # Interactive flow
-node script.mjs
+bun script.ts
 # → Choose ORM (prisma/drizzle/none)  
 # → Choose database type (dynamic based on ORM)
 # → Choose auth (better-auth/none)

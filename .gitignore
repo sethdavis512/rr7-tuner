@@ -79,3 +79,4 @@ out/
 
 # Claude Code settings
 .claude/settings.local.json
+/generated/prisma

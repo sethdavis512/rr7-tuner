@@ -1,11 +1,9 @@
-#!/usr/bin/env zx
-
 /**
  * @fileoverview Prisma integration module
  * @description Complete Prisma setup following the official React Router 7 guide
  */
 
-import { $ } from 'zx';
+import { $ } from 'bun';
 import { promises as fs } from 'fs';
 import {
     printStep,
@@ -13,24 +11,21 @@ import {
     printInstall,
     printNextSteps,
     printWarning
-} from '../utils/console.mjs';
+} from '../utils/console.ts';
 import {
     updatePackageJsonScripts,
     updatePackageJsonPrisma,
     dependenciesExist
-} from '../utils/package-manager.mjs';
-import { fileExists, readJsonFile, updateRoutesFile } from '../utils/file-operations.mjs';
+} from '../utils/package-manager.ts';
+import { fileExists, readJsonFile, updateRoutesFile } from '../utils/file-operations.ts';
 
 /**
  * Integrate Prisma ORM following React Router 7 guide
- * @param {boolean} includeRoutes - Whether to include example routes
- * @param {string} databaseType - Database type to use (postgresql, mysql, sqlite, etc.)
- * @returns {Promise<void>}
  */
 export async function integratePrisma(
-    includeRoutes = true,
-    databaseType = 'postgresql'
-) {
+    includeRoutes: boolean = true,
+    databaseType: string = 'postgresql'
+): Promise<void> {
     console.log(
         `Integrating Prisma ORM with ${databaseType.toUpperCase()} following React Router 7 guide...`
     );
@@ -117,12 +112,12 @@ export async function integratePrisma(
     }
 
     // Step 7: Update package.json with Prisma scripts (check if scripts already exist)
-    const packageJsonData = await readJsonFile('package.json', 'package.json');
+    const packageJsonData = await readJsonFile('package.json', 'package.json') as Record<string, any>;
     const existingScripts = packageJsonData.scripts || {};
     const prismaScripts = {
         'db:generate': 'prisma generate',
         'db:push': 'prisma db push',
-        'db:seed': 'tsx prisma/seed.ts'
+        'db:seed': 'bun prisma/seed.ts'
     };
 
     const scriptsExist = Object.keys(prismaScripts).every(
@@ -137,29 +132,27 @@ export async function integratePrisma(
         printStep('Updating package.json scripts');
         await updatePackageJsonScripts(prismaScripts);
         await updatePackageJsonPrisma({
-            seed: 'tsx prisma/seed.ts'
+            seed: 'bun prisma/seed.ts'
         });
         printSuccess('Package.json updated with Prisma scripts');
     }
 
     // Print next steps
     printNextSteps([
-        'Set your DATABASE_URL in .env file',
-        'Run: npm run db:push',
-        'Run: npm run db:seed',
-        'Run: npm run db:generate',
-        'Start your dev server'
+        'Set your DATABASE_URL in the .env file',
+        'Run "bun run db:push" to push your schema to the database',
+        'Run "bun run db:seed" to seed your database with example data',
+        'Run "bun run db:generate" to generate the Prisma client',
+        'Start your development server'
     ]);
 }
 
 /**
  * Create Prisma schema file
- * @param {string} databaseType - Database type to use
- * @returns {Promise<void>}
  */
-async function createPrismaSchema(databaseType) {
+async function createPrismaSchema(databaseType: string): Promise<void> {
     // Map database types to Prisma providers
-    const providerMap = {
+    const providerMap: Record<string, string> = {
         postgresql: 'postgresql',
         mysql: 'mysql',
         sqlite: 'sqlite',
@@ -174,7 +167,8 @@ async function createPrismaSchema(databaseType) {
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -183,7 +177,7 @@ datasource db {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   title     String
   content   String?
   published Boolean  @default(false)
@@ -196,63 +190,51 @@ model Post {
 
 /**
  * Create Prisma client configuration
- * @returns {Promise<void>}
  */
-async function createPrismaClient() {
-    const prismaClient = `import { PrismaClient } from "@prisma/client";
-import { withAccelerate } from "@prisma/extension-accelerate";
+async function createPrismaClient(): Promise<void> {
+    const prismaClient = `import { PrismaClient } from '@prisma/client';
+import { withAccelerate } from '@prisma/extension-accelerate';
 
-export const prisma =
-  globalThis.__prisma ??
-  new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
-        : ["error"],
-  }).$extends(withAccelerate());
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__prisma = prisma;
-}
+export const prisma = globalForPrisma.prisma ?? new PrismaClient().$extends(withAccelerate());
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __prisma: ReturnType<typeof prisma> | undefined;
-}`;
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;`;
 
     await fs.writeFile('app/lib/prisma.ts', prismaClient);
 }
 
 /**
  * Create Prisma seed file
- * @returns {Promise<void>}
  */
-async function createPrismaSeed() {
-    const seedFile = `import { PrismaClient } from "@prisma/client";
+async function createPrismaSeed(): Promise<void> {
+    const seed = `import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function seed() {
+async function main() {
   await prisma.post.create({
     data: {
-      title: "My first post",
-      content: "This is my first post!",
+      title: 'Hello World',
+      content: 'This is your first post!',
       published: true,
     },
   });
 
   await prisma.post.create({
     data: {
-      title: "My second post",
-      content: "This is my second post!",
+      title: 'Getting Started with React Router 7',
+      content: 'Learn how to build amazing web applications with React Router 7.',
       published: false,
     },
   });
 
-  console.log("Database has been seeded. 🌱");
+  console.log('Database has been seeded 🌱');
 }
 
-seed()
+main()
   .catch((e) => {
     console.error(e);
     process.exit(1);
@@ -261,133 +243,120 @@ seed()
     await prisma.$disconnect();
   });`;
 
-    await fs.writeFile('prisma/seed.ts', seedFile);
+    await fs.writeFile('prisma/seed.ts', seed);
 }
 
 /**
  * Create example routes for Prisma
- * @returns {Promise<void>}
  */
-async function createPrismaRoutes() {
-    // Posts index route
-    const postsRoute = `import { prisma } from "~/lib/prisma";
-import type { Route } from "./+types/posts";
-import { Link } from "react-router";
+async function createPrismaRoutes(): Promise<void> {
+    // Posts list route
+    const postsRoute = `import { prisma } from '~/lib/prisma';
+import type { Route } from './+types/posts';
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const posts = await prisma.post.findMany({
-    select: {
-      id: true,
-      title: true,
-      createdAt: true,
-      published: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  return { posts };
+    const posts = await prisma.post.findMany({
+        orderBy: { createdAt: 'desc' },
+    });
+    return { posts };
 }
 
 export default function Posts({ loaderData }: Route.ComponentProps) {
-  return (
-    <div>
-      <h1>Posts</h1>
-      <Link to="/posts/new">Create New Post</Link>
-      <ul>
-        {loaderData.posts.map((post) => (
-          <li key={post.id}>
-            <Link to={\`/posts/\${post.id}\`}>
-              {post.title} - {post.published ? "Published" : "Draft"}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+    const { posts } = loaderData;
+
+    return (
+        <div>
+            <h1>Posts</h1>
+            <a href="/posts/new">Create New Post</a>
+            <ul>
+                {posts.map((post) => (
+                    <li key={post.id}>
+                        <a href={\`/posts/\${post.id}\`}>
+                            {post.title} {post.published ? '✅' : '⏳'}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 }`;
 
     await fs.writeFile('app/routes/posts.tsx', postsRoute);
 
-    // Single post route
-    const postRoute = `import { prisma } from "~/lib/prisma";
-import type { Route } from "./+types/posts.$postId";
-import { Link } from "react-router";
+    // Individual post route
+    const postRoute = `import { prisma } from '~/lib/prisma';
+import type { Route } from './+types/posts.$postId';
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const postId = parseInt(params.postId);
-  const post = await prisma.post.findUnique({
-    where: { id: postId },
-  });
+    const post = await prisma.post.findUnique({
+        where: { id: params.postId },
+    });
 
-  if (!post) {
-    throw new Response("Post not found", { status: 404 });
-  }
+    if (!post) {
+        throw new Response('Not Found', { status: 404 });
+    }
 
-  return { post };
+    return { post };
 }
 
 export default function Post({ loaderData }: Route.ComponentProps) {
-  return (
-    <div>
-      <Link to="/posts">← Back to Posts</Link>
-      <h1>{loaderData.post.title}</h1>
-      <p>Status: {loaderData.post.published ? "Published" : "Draft"}</p>
-      <p>Created: {new Date(loaderData.post.createdAt).toLocaleDateString()}</p>
-      {loaderData.post.content && <div>{loaderData.post.content}</div>}
-    </div>
-  );
+    const { post } = loaderData;
+
+    return (
+        <div>
+            <h1>{post.title}</h1>
+            <p>{post.content}</p>
+            <p>Status: {post.published ? 'Published' : 'Draft'}</p>
+            <p>Created: {new Date(post.createdAt).toLocaleDateString()}</p>
+            <a href="/posts">← Back to Posts</a>
+        </div>
+    );
 }`;
 
     await fs.writeFile('app/routes/posts.$postId.tsx', postRoute);
 
     // New post route
-    const newPostRoute = `import { prisma } from "~/lib/prisma";
-import type { Route } from "./+types/posts.new";
-import { Form, redirect, Link } from "react-router";
+    const newPostRoute = `import { redirect } from '@react-router/node';
+import { prisma } from '~/lib/prisma';
+import type { Route } from './+types/posts.new';
 
 export async function action({ request }: Route.ActionArgs) {
-  const formData = await request.formData();
-  const title = formData.get("title") as string;
-  const content = formData.get("content") as string;
-  const published = formData.get("published") === "on";
+    const formData = await request.formData();
+    const title = formData.get('title') as string;
+    const content = formData.get('content') as string;
+    const published = formData.get('published') === 'on';
 
-  await prisma.post.create({
-    data: {
-      title,
-      content,
-      published,
-    },
-  });
+    await prisma.post.create({
+        data: { title, content, published },
+    });
 
-  return redirect("/posts");
+    return redirect('/posts');
 }
 
 export default function NewPost() {
-  return (
-    <div>
-      <Link to="/posts">← Back to Posts</Link>
-      <h1>Create New Post</h1>
-      <Form method="post">
+    return (
         <div>
-          <label htmlFor="title">Title:</label>
-          <input type="text" id="title" name="title" required />
+            <h1>Create New Post</h1>
+            <form method="post">
+                <div>
+                    <label htmlFor="title">Title:</label>
+                    <input type="text" id="title" name="title" required />
+                </div>
+                <div>
+                    <label htmlFor="content">Content:</label>
+                    <textarea id="content" name="content"></textarea>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" name="published" />
+                        Published
+                    </label>
+                </div>
+                <button type="submit">Create Post</button>
+            </form>
+            <a href="/posts">← Back to Posts</a>
         </div>
-        <div>
-          <label htmlFor="content">Content:</label>
-          <textarea id="content" name="content"></textarea>
-        </div>
-        <div>
-          <label htmlFor="published">
-            <input type="checkbox" id="published" name="published" />
-            Published
-          </label>
-        </div>
-        <button type="submit">Create Post</button>
-      </Form>
-    </div>
-  );
+    );
 }`;
 
     await fs.writeFile('app/routes/posts.new.tsx', newPostRoute);
