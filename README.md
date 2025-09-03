@@ -32,10 +32,12 @@ For automation, CI/CD, or when you know exactly what you want:
 Set up database integration with the specified ORM.
 
 **Options:**
+
 - `prisma` - Complete Prisma setup following React Router 7 tutorial
 - `drizzle` - Complete Drizzle setup with React Router 7 patterns
 
 **Example:**
+
 ```bash
 node script.mjs --orm prisma
 node script.mjs --db drizzle
@@ -46,9 +48,11 @@ node script.mjs --db drizzle
 Set up authentication with the specified provider.
 
 **Options:**
+
 - `better-auth` - Better Auth integration
 
 **Example:**
+
 ```bash
 node script.mjs --auth better-auth
 ```
@@ -58,10 +62,12 @@ node script.mjs --auth better-auth
 Include example routes (Posts CRUD operations for learning/testing).
 
 **Options:**
+
 - `true` (default) - Include example routes
 - `false` - Skip example route generation
 
 **Examples:**
+
 ```bash
 node script.mjs --orm prisma --routes=false
 node script.mjs --db drizzle --no-routes
