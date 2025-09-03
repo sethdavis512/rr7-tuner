@@ -21,7 +21,7 @@ Run without any arguments to start the interactive menu:
 node script.mjs
 ```
 
-This will prompt you with questions to select your database, authentication, and whether to include example routes. Perfect for first-time setup or when you want to add multiple integrations.
+This will prompt you with questions to select your ORM, specific database type, authentication, and whether to include example routes. Perfect for first-time setup or when you want to explore different database options.
 
 ### Command Line Arguments
 
@@ -41,6 +41,37 @@ Set up database integration with the specified ORM.
 ```bash
 node script.mjs --orm prisma
 node script.mjs --db drizzle
+```
+
+#### `--database-type` / `--dt`
+
+Specify the exact database type/provider to use with your chosen ORM.
+
+**Prisma Options:**
+- `postgresql` - PostgreSQL (default)
+- `mysql` - MySQL/MariaDB  
+- `sqlite` - SQLite
+- `mongodb` - MongoDB
+- `sqlserver` - Microsoft SQL Server
+- `cockroachdb` - CockroachDB
+
+**Drizzle Options:**
+- `turso` - Turso SQLite (default)
+- `postgres` - PostgreSQL
+- `neon` - Neon PostgreSQL
+- `vercel-postgres` - Vercel Postgres
+- `supabase` - Supabase PostgreSQL
+- `mysql` - MySQL
+- `planetscale` - PlanetScale MySQL
+- `sqlite` - Local SQLite
+- `d1` - Cloudflare D1
+
+**Examples:**
+
+```bash
+node script.mjs --orm prisma --database-type mysql
+node script.mjs --db drizzle --dt neon
+node script.mjs --orm prisma --database-type mongodb
 ```
 
 #### `--auth`
@@ -152,8 +183,15 @@ node script.mjs --auth better-auth
 # Combine multiple integrations
 node script.mjs --orm prisma --auth better-auth
 
+# Specify database type
+node script.mjs --orm prisma --database-type mysql
+node script.mjs --db drizzle --dt neon
+
 # Skip example routes
 node script.mjs --orm drizzle --no-routes
+
+# Full example with all options
+node script.mjs --orm drizzle --database-type planetscale --auth better-auth --no-routes
 ```
 
 ### When to Use Each Mode
