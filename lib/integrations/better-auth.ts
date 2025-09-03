@@ -3,8 +3,6 @@
  * @description Better Auth setup with database adapters and authentication pages
  */
 
-import { $ } from 'bun';
-
 export async function integrateBetterAuthWithPrisma(): Promise<void> {
     console.log('Integrating Better Auth with Prisma...');
     // TODO: Implement Better Auth with Prisma

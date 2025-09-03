@@ -9,9 +9,9 @@ import { z } from 'zod';
  * Schema for validating package.json structure
  */
 export const PackageJsonSchema = z.object({
-    scripts: z.record(z.string()).optional().default({}),
-    dependencies: z.record(z.string()).optional(),
-    devDependencies: z.record(z.string()).optional(),
+    scripts: z.record(z.string(), z.string()).default({}),
+    dependencies: z.record(z.string(), z.string()).optional(),
+    devDependencies: z.record(z.string(), z.string()).optional(),
     prisma: z.object({
         seed: z.string().optional()
     }).optional()

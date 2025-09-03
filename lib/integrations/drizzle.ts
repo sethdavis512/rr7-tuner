@@ -3,8 +3,6 @@
  * @description Complete Drizzle setup following React Router 7 patterns
  */
 
-import { $ } from 'bun';
-
 export async function integrateDrizzle(
     includeRoutes: boolean = true,
     databaseType: string = 'turso'
