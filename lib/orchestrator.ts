@@ -82,7 +82,8 @@ async function executeCliMode(args: CliArguments): Promise<void> {
         if (args.orm === 'prisma') {
             await integrateBetterAuthWithPrisma();
         } else if (args.orm === 'drizzle') {
-            await integrateBetterAuthWithDrizzle();
+            const databaseType = args.databaseType || args.dt || 'turso';
+            await integrateBetterAuthWithDrizzle(databaseType);
         } else {
             await integrateBetterAuth();
         }
