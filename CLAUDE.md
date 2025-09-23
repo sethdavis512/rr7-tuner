@@ -19,10 +19,16 @@ bun script.ts --db drizzle --dt turso
 bun script.ts --auth better-auth
 bun script.ts --orm prisma --database-type mysql --auth better-auth --no-routes
 
-# Test functionality
+# Include services (Railway deployment, Polar.sh payments)
+bun script.ts --orm prisma --services railway
+bun script.ts --auth better-auth --services polar railway
+
+# Development commands
 bun script.ts --help
 bun script.ts --version
-bun --check script.ts
+bun --check script.ts    # Type checking
+bun test                 # Run tests
+bun run typecheck        # TypeScript validation
 ```
 
 ### Development Dependencies
@@ -46,7 +52,8 @@ lib/
 │   ├── prisma.ts          # Complete Prisma setup
 │   ├── drizzle.ts         # Complete Drizzle setup
 │   ├── better-auth.ts     # Better Auth with all adapters
-│   └── polar.ts           # Polar.sh payments integration
+│   ├── polar.ts           # Polar.sh payments integration
+│   └── railway.ts         # Railway deployment integration
 ├── utils/
 │   ├── console.ts         # Consistent output formatting
 │   ├── file-operations.ts # Safe file I/O operations
@@ -59,12 +66,13 @@ script.ts                  # Entry point with error handling
 ```
 
 ### Key Integration Functions
-- `integratePrisma(includeRoutes, databaseType)` - Supports PostgreSQL, MySQL, SQLite, MongoDB, SQL Server, CockroachDB
+- `integratePrisma(includeRoutes, databaseType, railwayDeployment)` - Supports PostgreSQL, MySQL, SQLite, MongoDB, SQL Server, CockroachDB
 - `integrateDrizzle(includeRoutes, databaseType)` - Supports PostgreSQL, MySQL, SQLite variants (Turso, D1, Neon, PlanetScale, etc.)
 - `integrateBetterAuthWithPrisma()` - Better Auth with Prisma adapter
 - `integrateBetterAuthWithDrizzle()` - Better Auth with Drizzle adapter
 - `integrateBetterAuth()` - Standalone Better Auth setup
 - `integratePolar(authType)` - Polar.sh payments integration with Better Auth
+- `integrateRailway()` - Railway deployment platform configuration
 
 ### Database Type Support Matrix
 **Prisma** (6 types): `postgresql`, `mysql`, `sqlite`, `mongodb`, `sqlserver`, `cockroachdb`
@@ -86,6 +94,7 @@ script.ts                  # Entry point with error handling
 - **Route generation**: Complete CRUD examples with proper React Router 7 patterns
 - **Authentication pages**: Signup, signin, dashboard routes for Better Auth
 - **Payment routes**: Checkout success, customer portal, and upgrade pages for Polar.sh
+- **Railway deployment**: Production-ready configuration files and deployment scripts
 - **Automatic route registration**: Generated routes are automatically registered in `app/routes.ts` if it exists
 
 ### Integration Philosophy
@@ -104,6 +113,10 @@ The tool includes automatic route registration functionality that integrates gen
   - **ORM routes**: `/posts`, `/posts/:postId`, `/posts/new` (for both Prisma and Drizzle)
   - **Auth routes**: `/signup`, `/signin`, `/dashboard` (for Better Auth)
   - **Payment routes**: `/success`, `/portal`, `/upgrade` (for Polar.sh)
+- **Railway deployment configurations**:
+  - **railway.json**: Production deployment configuration
+  - **Package.json scripts**: Build, start, migrate:deploy, postinstall
+  - **Environment setup**: .env templates and gitignore updates
 
 ### Smart Detection Features
 All integrations include intelligent detection to prevent redundant operations:
@@ -116,18 +129,18 @@ All integrations include intelligent detection to prevent redundant operations:
 ## Development Guidelines
 
 ### Adding New Integrations
-1. Create new module in `lib/integrations/[name].mjs`
+1. Create new module in `lib/integrations/[name].ts`
 2. Export main integration function with JSDoc annotations
 3. Use utility functions from `lib/utils/` for file operations
-4. Add validation schemas to `lib/validation/schemas.mjs` if needed
+4. Add validation schemas to `lib/validation/schemas.ts` if needed
 5. Update orchestrator to include new integration option
 6. Add CLI argument and interactive prompt options
 
 ### Modifying Existing Integrations
 1. Locate the integration module in `lib/integrations/`
-2. Use consistent console output from `lib/utils/console.mjs`
-3. Leverage file operation utilities from `lib/utils/file-operations.mjs`
-4. Update package.json safely using `lib/utils/package-manager.mjs`
+2. Use consistent console output from `lib/utils/console.ts`
+3. Leverage file operation utilities from `lib/utils/file-operations.ts`
+4. Update package.json safely using `lib/utils/package-manager.ts`
 5. Use `updateRoutesFile()` to register generated routes in `app/routes.ts`
 
 ### File Organization Principles
@@ -155,9 +168,39 @@ bun script.ts [--orm|--db <orm>] [--database-type|--dt <type>] [--auth <auth>] [
 
 # Interactive flow
 bun script.ts
-# → Choose ORM (prisma/drizzle/none)  
+# → Choose ORM (prisma/drizzle/none)
 # → Choose database type (dynamic based on ORM)
 # → Choose auth (better-auth/none)
-# → Choose services (polar/none)
+# → Choose services (polar/railway/none)
 # → Choose routes (yes/no)
+
+# Railway deployment examples
+bun script.ts --orm prisma --services railway
+bun script.ts --orm prisma --auth better-auth --services railway polar
+```
+
+## Railway Integration
+
+The Railway integration provides production deployment configuration for React Router 7 + Prisma projects:
+
+### Railway + Prisma Coordination
+When Railway service is selected with Prisma (`--orm prisma --services railway`):
+- Prisma schema uses Railway-compatible output directory (`../app/generated/prisma`)
+- Railway-specific Prisma client configuration with custom import paths
+- Railway-compatible seed file with User/Post models (matches Railway tutorial)
+- Production deployment scripts (migrate:deploy, postinstall, build, start)
+
+### Railway Standalone Features
+- Creates `railway.json` with Nixpacks build configuration
+- Updates package.json with production deployment scripts
+- Sets up environment files (.env, .env.example)
+- Updates TypeScript paths for Prisma generated client
+- Updates .gitignore for Railway deployment artifacts
+
+### Railway Detection Logic
+```typescript
+// Railway integration checks for existing configurations
+const railwayConfigExists = await fileExists('railway.json');
+const scriptsExist = Object.keys(railwayScripts).every(script => script in existingScripts);
+// Only creates/updates if configurations don't already exist
 ```

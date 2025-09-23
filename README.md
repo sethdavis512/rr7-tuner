@@ -8,6 +8,7 @@ A React Router 7 enhancement tool that helps you add production-ready features t
 - **Drizzle Integration**: SQLite/LibSQL setup with multiple database provider support  
 - **Better Auth Integration**: Secure authentication with database adapters and OAuth support
 - **Polar.sh Integration**: Payments and subscriptions with Better Auth integration
+- **Railway Integration**: Production deployment configuration for React Router 7 + Prisma projects
 - **Automatic Route Registration**: Generated routes are automatically registered in `app/routes.ts`
 - **Smart Detection**: Prevents redundant setups by checking existing files and dependencies
 - **Example Routes**: Full CRUD operations and authentication flows
@@ -25,7 +26,7 @@ Run without any arguments to start the interactive menu:
 bun script.ts
 ```
 
-This will prompt you with questions to select your ORM, specific database type, authentication, additional services (like Polar.sh), and whether to include example routes. Perfect for first-time setup or when you want to explore different integration options.
+This will prompt you with questions to select your ORM, specific database type, authentication, additional services (like Polar.sh and Railway), and whether to include example routes. Perfect for first-time setup or when you want to explore different integration options.
 
 ### Command Line Arguments
 
@@ -98,13 +99,15 @@ Include additional service integrations.
 
 **Options:**
 - `polar` - Polar.sh payments and subscriptions integration
+- `railway` - Railway deployment platform integration
 
 **Examples:**
 
 ```bash
 bun script.ts --services polar
-bun script.ts --auth better-auth --services polar
-bun script.ts -s polar
+bun script.ts --services railway
+bun script.ts --auth better-auth --services polar railway
+bun script.ts -s polar -s railway
 ```
 
 #### `-r, --routes`
@@ -217,6 +220,43 @@ When you run `bun script.ts --services polar`, the script will:
 
 Polar.sh provides checkout, customer portal, usage tracking, and webhooks for React Router 7 applications.
 
+### Railway Integration
+
+When you run `bun script.ts --services railway`, the script will:
+
+1. Create Railway deployment configuration (`railway.json`)
+2. Update `package.json` with production deployment scripts:
+   - `build` - React Router 7 build command
+   - `start` - Production server start command
+   - `migrate:deploy` - Prisma production migrations
+   - `postinstall` - Generate Prisma client on deployment
+3. Set up environment files (`.env`, `.env.example`)
+4. Update TypeScript configuration for Prisma generated client paths
+5. Update `.gitignore` for Railway deployment files
+
+**Railway + Prisma Setup:**
+
+When Railway is combined with Prisma (`--orm prisma --services railway`), additional Railway-specific configurations are applied:
+
+- Prisma schema uses custom output directory (`../app/generated/prisma`)
+- Railway-compatible Prisma client configuration
+- Railway-specific seed file with User/Post models
+- Production migration scripts for Railway deployment
+
+### Next Steps After Railway Setup
+
+1. Create a Railway account at [railway.app](https://railway.app)
+2. Install Railway CLI: `npm install -g @railway/cli`
+3. Login to Railway: `railway login`
+4. Initialize project: `railway init`
+5. Add PostgreSQL database: `railway add postgresql`
+6. Deploy: `railway up`
+
+Railway will automatically:
+- Run `npx prisma migrate deploy` to set up your database
+- Generate the Prisma client during build
+- Start your React Router 7 application
+
 ### Other Options
 
 - `--help` - Show help information
@@ -233,8 +273,8 @@ bun script.ts
 # Example interaction:
 # ? Which database integration would you like to add? 🗄️  Prisma ORM
 # ? Which Prisma database type would you like to use? 🐘  PostgreSQL
-# ? Which authentication integration would you like to add? 🔐  Better Auth  
-# ? Which additional services would you like to integrate? 💰 Polar.sh (Payments & Subscriptions)
+# ? Which authentication integration would you like to add? 🔐  Better Auth
+# ? Which additional services would you like to integrate? ✔ 💰 Polar.sh (Payments & Subscriptions), ✔ 🚄 Railway (Deployment Platform)
 # ? Include example routes? (Posts CRUD operations for learning/testing) Yes
 ```
 
@@ -262,12 +302,60 @@ bun script.ts --orm drizzle --no-routes
 
 # Include services
 bun script.ts --auth better-auth --services polar
+bun script.ts --orm prisma --services railway
+
+# Railway deployment setup with Prisma
+bun script.ts --orm prisma --database-type postgresql --services railway
+
+# Full stack with Railway deployment
+bun script.ts --orm prisma --auth better-auth --services polar railway
 
 # Full example with all options
 bun script.ts --orm drizzle --database-type planetscale --auth better-auth --services polar --no-routes
+```
+
+## Railway Deployment Examples
+
+### Basic Railway Setup
+
+```bash
+# Basic Railway deployment configuration
+bun script.ts --services railway
+
+# Railway with Prisma (recommended for production)
+bun script.ts --orm prisma --services railway
+
+# Railway with specific database type
+bun script.ts --orm prisma --database-type postgresql --services railway
+```
+
+### Full Stack Railway Deployment
+
+```bash
+# Complete production setup with authentication and payments
+bun script.ts --orm prisma --auth better-auth --services railway polar
+
+# MySQL with Railway deployment
+bun script.ts --orm prisma --database-type mysql --services railway
+
+# Railway deployment without example routes (cleaner production setup)
+bun script.ts --orm prisma --services railway --no-routes
+```
+
+### Interactive Railway Setup
+
+```bash
+# Use interactive mode to select Railway along with other services
+bun script.ts
+# Then select:
+# - Database: Prisma ORM
+# - Database Type: PostgreSQL (or your preference)
+# - Auth: Better Auth (optional)
+# - Services: ✓ Railway (Deployment Platform)
 ```
 
 ### When to Use Each Mode
 
 - **Interactive Mode**: First-time setup, exploring options, multiple integrations
 - **CLI Arguments**: Automation, CI/CD pipelines, quick single feature addition
+- **Railway Integration**: When you need production deployment configuration

@@ -57,7 +57,7 @@ export function parseCliArguments(): CliArguments {
             alias: 's',
             type: 'array',
             description: 'Additional services to integrate',
-            choices: ['polar'] as const
+            choices: ['polar', 'railway'] as const
         })
         .help()
         .version('1.0.0')

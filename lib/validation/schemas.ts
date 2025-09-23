@@ -25,8 +25,8 @@ export const CliArgsSchema = z.object({
         // Drizzle options  
         'postgres', 'neon', 'vercel-postgres', 'supabase', 'planetscale', 'turso', 'd1'
     ]).optional(), // alias
-    services: z.array(z.enum(['polar'])).optional(),
-    s: z.array(z.enum(['polar'])).optional(), // alias
+    services: z.array(z.enum(['polar', 'railway'])).optional(),
+    s: z.array(z.enum(['polar', 'railway'])).optional(), // alias
     _: z.array(z.unknown()).optional(),
     $0: z.string().optional()
 }).passthrough(); // Allow additional yargs properties
@@ -44,7 +44,7 @@ export const InquirerAnswersSchema = z.object({
     ]).optional(),
     auth: z.enum(['better-auth', 'none']),
     includeRoutes: z.boolean(),
-    services: z.array(z.enum(['polar'])).default([])
+    services: z.array(z.enum(['polar', 'railway'])).default([])
 });
 
 export type CliArgs = z.infer<typeof CliArgsSchema>;

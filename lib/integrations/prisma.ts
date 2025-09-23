@@ -24,7 +24,8 @@ import { fileExists, readJsonFile, updateRoutesFile } from '../utils/file-operat
  */
 export async function integratePrisma(
     includeRoutes: boolean = true,
-    databaseType: string = 'postgresql'
+    databaseType: string = 'postgresql',
+    railwayDeployment: boolean = false
 ): Promise<void> {
     console.log(
         `Integrating Prisma ORM with ${databaseType.toUpperCase()} following React Router 7 guide...`
@@ -63,7 +64,7 @@ export async function integratePrisma(
         printWarning('Prisma schema already exists, skipping schema creation');
     } else {
         printStep('Creating Prisma schema');
-        await createPrismaSchema(databaseType);
+        await createPrismaSchema(databaseType, railwayDeployment);
         printSuccess('Prisma schema created');
     }
 
@@ -73,7 +74,7 @@ export async function integratePrisma(
     } else {
         printStep('Creating Prisma client configuration');
         await $`mkdir -p app/lib`;
-        await createPrismaClient();
+        await createPrismaClient(railwayDeployment);
         printSuccess('Prisma client configuration created');
     }
 
@@ -83,7 +84,7 @@ export async function integratePrisma(
         printWarning('Prisma seed file already exists, skipping seed creation');
     } else {
         printStep('Creating seed file');
-        await createPrismaSeed();
+        await createPrismaSeed(railwayDeployment);
         printSuccess('Seed file created');
     }
 
@@ -114,7 +115,14 @@ export async function integratePrisma(
     // Step 7: Update package.json with Prisma scripts (check if scripts already exist)
     const packageJsonData = await readJsonFile('package.json', 'package.json') as Record<string, any>;
     const existingScripts = packageJsonData.scripts || {};
-    const prismaScripts = {
+    const prismaScripts = railwayDeployment ? {
+        'db:generate': 'prisma generate',
+        'db:push': 'prisma db push',
+        'db:seed': 'tsx prisma/seed.ts',
+        'migrate:dev': 'prisma migrate dev',
+        'migrate:deploy': 'prisma migrate deploy',
+        'studio': 'prisma studio'
+    } : {
         'db:generate': 'prisma generate',
         'db:push': 'prisma db push',
         'db:seed': 'bun prisma/seed.ts'
@@ -132,7 +140,7 @@ export async function integratePrisma(
         printStep('Updating package.json scripts');
         await updatePackageJsonScripts(prismaScripts);
         await updatePackageJsonPrisma({
-            seed: 'bun prisma/seed.ts'
+            seed: railwayDeployment ? 'tsx prisma/seed.ts' : 'bun prisma/seed.ts'
         });
         printSuccess('Package.json updated with Prisma scripts');
     }
@@ -150,7 +158,7 @@ export async function integratePrisma(
 /**
  * Create Prisma schema file
  */
-async function createPrismaSchema(databaseType: string): Promise<void> {
+async function createPrismaSchema(databaseType: string, railwayDeployment: boolean = false): Promise<void> {
     // Map database types to Prisma providers
     const providerMap: Record<string, string> = {
         postgresql: 'postgresql',
@@ -163,7 +171,34 @@ async function createPrismaSchema(databaseType: string): Promise<void> {
 
     const provider = providerMap[databaseType] || 'postgresql';
 
-    const schema = `// This is your Prisma schema file,
+    const schema = railwayDeployment ? `// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "${provider}"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+}` : `// This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -191,8 +226,18 @@ model Post {
 /**
  * Create Prisma client configuration
  */
-async function createPrismaClient(): Promise<void> {
-    const prismaClient = `import { PrismaClient } from '@prisma/client';
+async function createPrismaClient(railwayDeployment: boolean = false): Promise<void> {
+    const prismaClient = railwayDeployment ? `import { PrismaClient } from "../generated/prisma/client.js";
+
+const globalForPrisma = global as unknown as {
+  prisma: PrismaClient
+}
+
+const prisma = globalForPrisma.prisma || new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+export default prisma` : `import { PrismaClient } from '@prisma/client';
 import { withAccelerate } from '@prisma/extension-accelerate';
 
 const globalForPrisma = globalThis as unknown as {
@@ -209,8 +254,64 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;`;
 /**
  * Create Prisma seed file
  */
-async function createPrismaSeed(): Promise<void> {
-    const seed = `import { PrismaClient } from '@prisma/client';
+async function createPrismaSeed(railwayDeployment: boolean = false): Promise<void> {
+    const seed = railwayDeployment ? `import { PrismaClient, Prisma } from "../app/generated/prisma/client.js";
+
+const prisma = new PrismaClient();
+
+const userData: Prisma.UserCreateInput[] = [
+  {
+    name: "Alice",
+    email: "alice@prisma.io",
+    posts: {
+      create: [
+        {
+          title: "Join the Prisma Discord",
+          content: "https://pris.ly/discord",
+          published: true,
+        },
+        {
+          title: "Prisma on YouTube",
+          content: "https://pris.ly/youtube",
+        },
+      ],
+    },
+  },
+  {
+    name: "Bob",
+    email: "bob@prisma.io",
+    posts: {
+      create: [
+        {
+          title: "Follow Prisma on Twitter",
+          content: "https://www.twitter.com/prisma",
+          published: true,
+        },
+      ],
+    },
+  },
+];
+
+export async function main() {
+  console.log(\`Start seeding ...\`)
+  for (const u of userData) {
+    const user = await prisma.user.create({
+      data: u,
+    });
+    console.log(\`Created user with id: \${user.id}\`);
+  }
+  console.log(\`Seeding finished.\`)
+}
+
+main()
+  .then(async () => {
+    await prisma.$disconnect()
+  })
+  .catch(async (e) => {
+    console.error(e)
+    await prisma.$disconnect()
+    process.exit(1)
+  })` : `import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

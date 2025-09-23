@@ -15,6 +15,7 @@ import {
     integrateBetterAuth 
 } from './integrations/better-auth.ts';
 import { integratePolar } from './integrations/polar.ts';
+import { integrateRailway } from './integrations/railway.ts';
 import { printHeader, printSeparator, printError } from './utils/console.ts';
 
 /**
@@ -63,9 +64,12 @@ async function executeCliMode(args: CliArguments): Promise<void> {
     const databaseType = args.databaseType || args.dt;
 
     // Execute database integration
+    const services = args.services || args.s || [];
+    const useRailway = services.includes('railway');
+
     if (args.orm === 'prisma') {
         const prismaDbType = databaseType || 'postgresql';
-        await integratePrisma(includeRoutes, prismaDbType);
+        await integratePrisma(includeRoutes, prismaDbType, useRailway);
         if (args.auth !== undefined) {
             printSeparator();
         }
@@ -90,12 +94,18 @@ async function executeCliMode(args: CliArguments): Promise<void> {
     }
 
     // Execute service integrations
-    const services = args.services || args.s || [];
     if (services.includes('polar')) {
         if (args.auth || services.length > 0) {
             printSeparator();
         }
         await integratePolar(args.auth);
+    }
+
+    if (services.includes('railway')) {
+        if (args.auth || args.orm || services.indexOf('railway') > 0) {
+            printSeparator();
+        }
+        await integrateRailway();
     }
 
     console.log('\n✨ Integration complete! Check the output above for next steps.');
@@ -112,9 +122,11 @@ async function executeInteractiveMode(): Promise<void> {
     const answers = validateInquirerAnswers(rawAnswers);
 
     // Execute database integration
+    const useRailway = answers.services.includes('railway');
+
     if (answers.database === 'prisma') {
         const databaseType = answers.databaseType || 'postgresql';
-        await integratePrisma(answers.includeRoutes, databaseType);
+        await integratePrisma(answers.includeRoutes, databaseType, useRailway);
         if (answers.auth !== 'none') {
             printSeparator();
         }
@@ -143,6 +155,13 @@ async function executeInteractiveMode(): Promise<void> {
             printSeparator();
         }
         await integratePolar(answers.auth);
+    }
+
+    if (answers.services.includes('railway')) {
+        if (answers.auth !== 'none' || answers.database !== 'none' || answers.services.indexOf('railway') > 0) {
+            printSeparator();
+        }
+        await integrateRailway();
     }
 
     // Final summary

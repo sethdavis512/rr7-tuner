@@ -114,6 +114,11 @@ export async function promptUserPreferences(): Promise<InteractiveAnswers> {
                     name: '💰 Polar.sh (Payments & Subscriptions)',
                     value: 'polar',
                     short: 'Polar.sh'
+                },
+                {
+                    name: '🚄 Railway (Deployment Platform)',
+                    value: 'railway',
+                    short: 'Railway'
                 }
             ],
             default: []
